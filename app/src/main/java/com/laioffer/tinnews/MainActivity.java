@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);//get nav_view
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);//get host_fragment
@@ -31,23 +32,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
         NavigationUI.setupActionBarWithNavController(this, navController);//set up tht title of the UI (actionbar) without this, will only show app name
 
-        //newInstance is whole Api, give to newsApi to customize
-        NewsApi api = RetrofitClient.newInstance(this).create(NewsApi.class);
-        //callback in another thread, Async
-        api.getTopHeadlines("US").enqueue(new Callback<NewsResponse>() {
-            @Override
-            public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
-                    if (response.isSuccessful()) {
-                        Log.d("getTopHeadlines", response.body().toString());
-                    } else {
-                        Log.d("getTopHeadlines", response.toString());
-                     }
-             }
-            @Override
-            public void onFailure(Call<NewsResponse> call, Throwable t) {
-                    Log.d("getTopHeadlines", t.toString());
-            }
-        });
     }
 
     /**
