@@ -1,5 +1,6 @@
 # TinNews
 Architecture:
+
 ![Screen Shot 2021-02-12 at 2 36 29 AM](https://user-images.githubusercontent.com/63526490/107757988-1facfb80-6cdb-11eb-8622-c8b953cf5d89.png)
 
 V1.0 BottomSheet and Android Navigation,
