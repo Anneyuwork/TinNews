@@ -1,13 +1,20 @@
 package com.laioffer.tinnews.repository;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.laioffer.tinnews.TinNewsApplication;
+import com.laioffer.tinnews.database.AppDatabase;
+import com.laioffer.tinnews.model.Article;
 import com.laioffer.tinnews.model.NewsResponse;
 import com.laioffer.tinnews.network.NewsApi;
 import com.laioffer.tinnews.network.RetrofitClient;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -15,9 +22,14 @@ import retrofit2.Response;
 
 public class NewsRepository {
     private final NewsApi newsApi;
+    private final AppDatabase database;
+    private AsyncTask asyncTask;
+
 
     public NewsRepository(Context context) {
         newsApi = RetrofitClient.newInstance(context).create(NewsApi.class);
+        //DataBase Access
+        database = TinNewsApplication.getDatabase();
     }
 
     public LiveData<NewsResponse> getTopHeadlines(String country) {
@@ -64,6 +76,36 @@ public class NewsRepository {
         return everyThingLiveData;
     }
 
+    public LiveData<Boolean> favoriteArticle(Article article) {
+        MutableLiveData<Boolean> isSuccessLiveData = new MutableLiveData<>();
+        //Create an AsyncTask for database execution.
+        asyncTask = new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                try {
+                    database.dao().saveArticle(article);
+                } catch (Exception e) {
+                    Log.e("Test", e.getMessage());
+                    return false;
+                }
+                return true;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean isSuccess) {
+                article.favorite = isSuccess;
+                isSuccessLiveData.setValue(isSuccess);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        return isSuccessLiveData;
+    }
+
+    //Add onCancel function to prevent potential memory leak.
+    public void onCancel() {
+        if (asyncTask != null) {
+            asyncTask.cancel(true);
+        }
+    }
 
 
 }
